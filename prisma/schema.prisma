@@ -1,0 +1,139 @@
+// Esquema completo para dominio de treinos e cardio.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+enum ExecutionType {
+  FORCA_CARGA
+  PESO_CORPORAL
+  TEMPO
+  CARDIO_CONTINUO
+}
+
+enum ExecutionMode {
+  REPETICOES
+  TEMPO
+  CARDIO
+}
+
+enum FoodIntakeLevel {
+  DENTRO_DA_DIETA
+  LEVEMENTE_ACIMA
+  ACIMA
+  FORA_DA_DIETA
+}
+
+enum TipoTreino {
+  FORCA
+  PESO_CORPO
+  TEMPO
+  CARDIO
+}
+
+model User {
+  id         String              @id @default(cuid())
+  email      String              @unique
+  name       String?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  exercises  Exercise[]          @relation("UserExercises")
+  plans      WorkoutPlan[]
+  executions ExerciseExecution[]
+  cardio     CardioSession[]
+  dailyLogs  DailyLog[]
+}
+
+model Exercise {
+  id          String   @id @default(cuid())
+  name        String
+  muscleGroup String
+  type        ExecutionType
+  user        User?    @relation("UserExercises", fields: [userId], references: [id])
+  userId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  planEntries PlanExercise[]
+  executions  ExerciseExecution[]
+}
+
+model WorkoutPlan {
+  id          String         @id @default(cuid())
+  user        User           @relation(fields: [userId], references: [id])
+  userId      String
+  name        String
+  weekDay     Int // 0 = Domingo, 6 = Sabado
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  exercises   PlanExercise[]
+}
+
+model PlanExercise {
+  id             String       @id @default(cuid())
+  workoutPlan    WorkoutPlan  @relation(fields: [workoutPlanId], references: [id])
+  workoutPlanId  String
+  exercise       Exercise     @relation(fields: [exerciseId], references: [id])
+  exerciseId     String
+  tipoTreino     TipoTreino   // Tipo de treino obrigatório
+  executionMode  ExecutionMode @default(REPETICOES)
+  targetSets     Int?
+  targetReps     Int?
+  targetWeight   Float?
+  targetDuration Int? // segundos para exercicios por tempo
+  restSeconds    Int? // descanso entre series
+  weeklyTargetMinutes Int?
+  position       Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  executions     ExerciseExecution[]
+}
+
+model ExerciseExecution {
+  id             String         @id @default(cuid())
+  exercise       Exercise       @relation(fields: [exerciseId], references: [id])
+  exerciseId     String
+  user           User           @relation(fields: [userId], references: [id])
+  userId         String
+  type           ExecutionType
+  reps           Int?
+  weight         Float?
+  durationSec    Int?
+  executedAt     DateTime       @default(now())
+  planExercise   PlanExercise?  @relation(fields: [planExerciseId], references: [id])
+  planExerciseId String?
+  notes          String?
+
+  @@index([userId, exerciseId, executedAt])
+}
+
+model CardioSession {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  modality   String   // corrida, bike, caminhada etc.
+  duration   Int      // minutos
+  distanceKm Float?   // opcional
+  startedAt  DateTime @default(now())
+  createdAt  DateTime @default(now())
+  notes      String?
+
+  @@index([userId, startedAt])
+}
+
+model DailyLog {
+  id            String           @id @default(cuid())
+  user          User             @relation(fields: [userId], references: [id])
+  userId        String
+  date          DateTime
+  waterLiters   Float            @default(0)
+  foodIntake    FoodIntakeLevel
+  note          String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  @@unique([userId, date])
+}
