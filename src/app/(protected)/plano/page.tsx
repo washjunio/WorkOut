@@ -109,7 +109,7 @@ export default function PlanoPage() {
         {loading && (
           <div className="space-y-3">
             {[1, 2, 3].map((k) => (
-              <Card key={k} className="space-y-3 fade-in" style={{ animationDelay: `${k * 0.1}s` }}>
+              <Card key={k} className="space-y-3 fade-in">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-3 w-48" />
                 <div className="space-y-2">
@@ -121,10 +121,10 @@ export default function PlanoPage() {
           </div>
         )}
 
-        {!loading && (
-          <div className="space-y-3">
-            {plano.map((dia, index) => (
-              <Card key={dia.id} className="space-y-3 slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+      {!loading && (
+        <div className="space-y-3">
+          {plano.map((dia, index) => (
+            <Card key={dia.id} className="space-y-3 slide-up">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-lg font-semibold">{diasSemana[dia.weekDay]}</div>

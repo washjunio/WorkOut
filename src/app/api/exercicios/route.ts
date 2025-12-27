@@ -33,6 +33,8 @@ export async function GET() {
         {
           workoutPlanId: plan.id,
           exerciseId: mapByName['Supino reto'],
+          tipoTreino: 'FORCA',
+          executionMode: 'REPETICOES',
           targetSets: 4,
           targetReps: 10,
           targetWeight: 30,
@@ -41,6 +43,8 @@ export async function GET() {
         {
           workoutPlanId: plan.id,
           exerciseId: mapByName['Agachamento'],
+          tipoTreino: 'FORCA',
+          executionMode: 'REPETICOES',
           targetSets: 4,
           targetReps: 12,
           targetWeight: 40,
@@ -49,6 +53,8 @@ export async function GET() {
         {
           workoutPlanId: plan.id,
           exerciseId: mapByName['Prancha'],
+          tipoTreino: 'TEMPO',
+          executionMode: 'TEMPO',
           targetSets: 3,
           targetDuration: 60,
           position: 3,
@@ -72,7 +78,12 @@ export async function POST(request: Request) {
   }
 
   const exercise = await prisma.exercise.create({
-    data: { ...parsed.data, userId: user.id },
+    data: {
+      name: parsed.data.name,
+      muscleGroup: parsed.data.muscleGroup,
+      type: parsed.data.type,
+      user: { connect: { id: user.id } },
+    },
   });
 
   return NextResponse.json({ data: exercise }, { status: 201 });

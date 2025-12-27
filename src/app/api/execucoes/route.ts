@@ -40,8 +40,14 @@ export async function POST(request: Request) {
   const data = parsed.data;
   const execution = await prisma.exerciseExecution.create({
     data: {
-      ...data,
-      userId: user.id,
+      type: data.type,
+      reps: data.reps,
+      weight: data.weight,
+      durationSec: data.durationSec,
+      notes: data.notes,
+      exercise: { connect: { id: data.exerciseId } },
+      planExercise: data.planExerciseId ? { connect: { id: data.planExerciseId } } : undefined,
+      user: { connect: { id: user.id } },
     },
   });
   return NextResponse.json({ data: execution }, { status: 201 });

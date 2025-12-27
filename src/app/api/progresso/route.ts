@@ -14,13 +14,21 @@ export async function GET() {
     include: { exercise: true },
   });
 
-  const execucoes = await prisma.exerciseExecution.findMany({
+  const execucoesDb = await prisma.exerciseExecution.findMany({
     where: { userId: user.id, executedAt: { gte: start, lte: end } },
   });
+  const execucoes = execucoesDb.map((e) => ({
+    ...e,
+    executedAt: e.executedAt.toISOString(),
+  }));
 
-  const cardio = await prisma.cardioSession.findMany({
+  const cardioDb = await prisma.cardioSession.findMany({
     where: { userId: user.id, startedAt: { gte: start, lte: end } },
   });
+  const cardio = cardioDb.map((c) => ({
+    ...c,
+    startedAt: c.startedAt.toISOString(),
+  }));
 
   const planoSimplificado = planExercises.map((p) => ({
     id: p.exerciseId,

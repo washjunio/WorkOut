@@ -73,18 +73,20 @@ export default function HojePage() {
           setPlanExercises(mapped);
         } else {
           listarExercicios().then((list) => {
-            const fallback = list.map((ex) => ({
+            const fallback: PlannedExercise[] = list.map((ex) => ({
+              planExerciseId: undefined,
               executionMode:
                 ex.type === 'TEMPO'
                   ? 'TEMPO'
                   : ex.type === 'CARDIO_CONTINUO'
                   ? 'CARDIO'
                   : 'REPETICOES',
-              exercise: ex,
+              restSeconds: 90,
               targetSets: ex.targetSets ?? 3,
               targetReps: ex.targetReps ?? 10,
               targetDuration: ex.targetDuration ?? 60,
-              restSeconds: 90,
+              weeklyTargetMinutes: undefined,
+              exercise: ex,
             }));
             setPlanExercises(fallback);
           });
@@ -261,7 +263,7 @@ export default function HojePage() {
       {loading && (
         <div className="space-y-3">
           {[1, 2].map((k) => (
-            <Card key={k} className="space-y-3 fade-in" style={{ animationDelay: `${k * 0.1}s` }}>
+            <Card key={k} className="space-y-3 fade-in">
               <Skeleton className="h-4 w-32" />
               <div className="space-y-2">
                 <Skeleton className="h-10 w-full" />
@@ -274,7 +276,7 @@ export default function HojePage() {
 
       {!loading &&
         Object.entries(grouped).map(([muscle, items], index) => (
-          <Card key={muscle} className="space-y-4 slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+          <Card key={muscle} className="space-y-4 slide-up">
             <h3 className="text-lg font-semibold">{muscle}</h3>
             <div className="space-y-3">
               {items.map((ex) => (

@@ -47,7 +47,13 @@ async function upsertLog(request: Request) {
   const log = await prisma.dailyLog.upsert({
     where: { userId_date: { userId: user.id, date: start } },
     update: parsed.data,
-    create: { ...parsed.data, userId: user.id, date: start },
+    create: {
+      waterLiters: parsed.data.waterLiters,
+      foodIntake: parsed.data.foodIntake,
+      note: parsed.data.note,
+      date: start,
+      user: { connect: { id: user.id } },
+    },
   });
   return NextResponse.json({ data: log });
 }

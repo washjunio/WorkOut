@@ -1,4 +1,4 @@
-import { PrismaClient, ExecutionType, FoodIntakeLevel } from '@prisma/client';
+import { PrismaClient, ExecutionType, FoodIntakeLevel, TipoTreino } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -53,10 +53,16 @@ async function main() {
     for (const slot of plan.slots) {
       await prisma.planExercise.create({
         data: {
-          workoutPlanId: wp.id,
-          exerciseId: mapEx[slot],
+          workoutPlan: { connect: { id: wp.id } },
+          exercise: { connect: { id: mapEx[slot] } },
           executionMode:
             slot === 'Prancha' ? 'TEMPO' : slot === 'Corrida' ? 'CARDIO' : 'REPETICOES',
+          tipoTreino:
+            slot === 'Prancha'
+              ? TipoTreino.TEMPO
+              : slot === 'Corrida'
+              ? TipoTreino.CARDIO
+              : TipoTreino.FORCA,
           targetSets: 4,
           targetReps: slot === 'Prancha' ? null : 10,
           targetDuration: slot === 'Prancha' ? 60 : null,

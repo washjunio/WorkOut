@@ -43,7 +43,7 @@ export default function ProgressoPage() {
             <Skeleton className="h-3 w-full" />
           </Card>
           {[1, 2, 3].map((k) => (
-            <Card key={k} className="space-y-2 fade-in" style={{ animationDelay: `${k * 0.1}s` }}>
+            <Card key={k} className="space-y-2 fade-in">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-2 w-full" />
             </Card>
@@ -72,7 +72,7 @@ export default function ProgressoPage() {
 
       <div className="space-y-3">
         {grupos.map((g, index) => (
-          <Card key={g.muscleGroup} className="space-y-3 slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+          <Card key={g.muscleGroup} className="space-y-3 slide-up">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <div className="font-semibold text-base">{g.muscleGroup}</div>

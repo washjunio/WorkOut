@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { listarExercicios } from '@/services/exercicios.service';
 import { adicionarExercicioAoPlano, obterPlanoSemanal } from '@/services/plano.service';
+import type { ExerciseDTO } from '@/types';
 import { Card, Button } from '@/components/ui';
 
 type PlanoDia = Awaited<ReturnType<typeof obterPlanoSemanal>>[number];
@@ -10,30 +11,46 @@ type PlanoDia = Awaited<ReturnType<typeof obterPlanoSemanal>>[number];
 // Tela de configuracoes: cadastro de plano semanal simples.
 export default function ConfiguracoesPage() {
   const [plano, setPlano] = useState<PlanoDia[]>([]);
-  const [exercicios, setExercicios] = useState<{ id: string; name: string }[]>([]);
+  const [exercicios, setExercicios] = useState<ExerciseDTO[]>([]);
   const [form, setForm] = useState({
     weekDay: 1,
     exerciseId: '',
     targetSets: 3,
     targetReps: 10,
-    targetWeight: 20,
+    exerciseName: '',
+    muscleGroup: 'Peito',
+    executionMode: 'REPETICOES' as 'REPETICOES' | 'TEMPO' | 'CARDIO',
+    tipoTreino: 'FORCA' as 'FORCA' | 'PESO_CORPO' | 'TEMPO' | 'CARDIO',
   });
 
   useEffect(() => {
     obterPlanoSemanal().then(setPlano);
-    listarExercicios().then((list) => setExercicios(list.map((e) => ({ id: e.id, name: e.name }))));
+    listarExercicios().then((list) => setExercicios(list));
   }, []);
 
   const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
   const handleSubmit = async () => {
     if (!form.exerciseId) return;
+    const selected = exercicios.find((e) => e.id === form.exerciseId);
+    const tipo =
+      form.tipoTreino ||
+      (form.executionMode === 'CARDIO'
+        ? 'CARDIO'
+        : form.executionMode === 'TEMPO'
+        ? 'TEMPO'
+        : 'FORCA');
     await adicionarExercicioAoPlano({
       weekDay: form.weekDay,
       exerciseId: form.exerciseId,
+      exerciseName: selected?.name || form.exerciseName || 'Exercício',
+      muscleGroup: selected?.muscleGroup || form.muscleGroup,
+      tipoTreino: tipo,
+      executionMode: form.executionMode,
       targetSets: form.targetSets,
       targetReps: form.targetReps,
-      targetWeight: form.targetWeight,
+      targetDuration: form.executionMode === 'TEMPO' ? 60 : undefined,
+      weeklyTargetMinutes: form.executionMode === 'CARDIO' ? 90 : undefined,
     });
     const atualizado = await obterPlanoSemanal();
     setPlano(atualizado);
@@ -97,15 +114,6 @@ export default function ConfiguracoesPage() {
               className="mt-1 w-full rounded bg-[var(--bg)] px-2 py-2 text-sm"
               value={form.targetReps}
               onChange={(e) => setForm((f) => ({ ...f, targetReps: Number(e.target.value) }))}
-            />
-          </label>
-          <label className="text-sm">
-            Peso alvo (kg)
-            <input
-              type="number"
-              className="mt-1 w-full rounded bg-[var(--bg)] px-2 py-2 text-sm"
-              value={form.targetWeight}
-              onChange={(e) => setForm((f) => ({ ...f, targetWeight: Number(e.target.value) }))}
             />
           </label>
         </div>

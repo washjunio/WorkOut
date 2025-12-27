@@ -33,8 +33,15 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
+  const data = parsed.data;
   const session = await prisma.cardioSession.create({
-    data: { ...parsed.data, userId: user.id },
+    data: {
+      modality: data.modality,
+      duration: data.duration,
+      distanceKm: data.distanceKm,
+      notes: data.notes,
+      user: { connect: { id: user.id } },
+    },
   });
   return NextResponse.json({ data: session }, { status: 201 });
 }
